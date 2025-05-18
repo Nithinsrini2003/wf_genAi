@@ -1,0 +1,188 @@
+✅ Your Requirements (Recap)
+Web application in Streamlit frontend + Flask backend
+
+Upload two API spec documents: old and new
+
+Summarize both individually (shown side by side)
+
+Show comparison/difference in tabular form below
+
+Use Tachyon On-Prem LLM + vector embedding with SentenceTransformer
+
+You have cookies HIGGS_SESSION, TACHYON_URL, MODEL_ID, etc. (used for API calls)
+
+Use RAG for contextual summarization and comparison
+
+🔧 Solution Design
+We'll build:
+
+app.py: Your Flask backend with 1 endpoint:
+
+/analyze: Accept 2 files, summarize both using Tachyon, and return diff
+
+main_llm.py: Refactored functions to:
+
+Generate summaries for each spec
+
+Return comparison
+
+llm_utils.py: No major change; slight reuse
+
+streamlit_frontend.py: Upload 2 files and show results side by side
+
+✅ .env File (You’ll Need This)
+env
+Copy
+Edit
+HIGGS_SESSION=your_cookie_here
+TACHYON_URL=https://your-tachyon-url/api/chat
+MODEL_ID=your_model_id_here
+TEXT_EMBEDDING_MODEL=sentence-transformers/all-MiniLM-L6-v2
+✅ Updated Files
+📁 app.py (Flask Backend)
+python
+Copy
+Edit
+from flask import Flask, request, jsonify
+from flask_cors import CORS
+from main_llm import process_files
+import os
+
+app = Flask(__name__)
+CORS(app)
+
+@app.route('/analyze', methods=['POST'])
+def analyze_files():
+    try:
+        old_file = request.files.get('oldFile')
+        new_file = request.files.get('newFile')
+
+        if not old_file or not new_file:
+            return jsonify({'error': 'Both files are required'}), 400
+
+        old_path = os.path.join('uploads', 'old_api.txt')
+        new_path = os.path.join('uploads', 'new_api.txt')
+
+        os.makedirs('uploads', exist_ok=True)
+        old_file.save(old_path)
+        new_file.save(new_path)
+
+        result = process_files(old_path, new_path)
+
+        return jsonify(result), 200
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+if __name__ == '__main__':
+    app.run(debug=True, port=5000)
+📁 main_llm.py
+python
+Copy
+Edit
+from llm_utils import load_and_process_file, call_llm
+
+def summarize_file(file_path, label):
+    query = f"Please summarize the {label} API specification document."
+    return call_llm(query, file_path)
+
+def compare_files(file1_path, file2_path):
+    query = """Compare the old and new API specifications. List out differences in a table format 
+               showing what changed between the two versions, like endpoints added, removed, modified, etc."""
+    return call_llm(query, file1_path)  # file1 assumed to include both
+    # You could optionally concatenate the contents from both for full context if needed
+
+def process_files(old_file, new_file):
+    old_summary = summarize_file(old_file, "old")
+    new_summary = summarize_file(new_file, "new")
+    comparison = compare_files(old_file, new_file)
+
+    return {
+        "old_summary": old_summary,
+        "new_summary": new_summary,
+        "comparison": comparison
+    }
+📁 llm_utils.py (no change needed from your current version except maybe call_llm should dynamically read both files if you plan to send both for comparison)
+If you want to pass both file contents for the comparison call, edit this line in call_llm():
+
+python
+Copy
+Edit
+query_with_context = f"Context:\n{context}\n\n{query}"
+To:
+
+python
+Copy
+Edit
+with open(file_path, 'r') as f1, open(file_path_2, 'r') as f2:
+    context = f"Old Spec:\n{f1.read()}\n\nNew Spec:\n{f2.read()}"
+query_with_context = f"{context}\n\n{query}"
+✅ streamlit_frontend.py
+python
+Copy
+Edit
+import streamlit as st
+import requests
+
+st.set_page_config(layout="wide")
+st.title("API Spec Comparator")
+
+st.sidebar.header("Upload API Spec Files")
+
+old_file = st.sidebar.file_uploader("Upload Old API Spec", type=["txt", "md", "json"])
+new_file = st.sidebar.file_uploader("Upload New API Spec", type=["txt", "md", "json"])
+
+if st.sidebar.button("Compare"):
+    if old_file and new_file:
+        with st.spinner("Analyzing..."):
+            files = {
+                "oldFile": old_file,
+                "newFile": new_file
+            }
+            response = requests.post("http://localhost:5000/analyze", files=files)
+            if response.status_code == 200:
+                data = response.json()
+                col1, col2 = st.columns(2)
+
+                with col1:
+                    st.subheader("Old API Summary")
+                    st.write(data["old_summary"])
+
+                with col2:
+                    st.subheader("New API Summary")
+                    st.write(data["new_summary"])
+
+                st.markdown("---")
+                st.subheader("Comparison Table / Analysis")
+                st.write(data["comparison"])
+            else:
+                st.error(f"Error: {response.text}")
+    else:
+        st.warning("Please upload both files before comparing.")
+✅ Folder Structure
+bash
+Copy
+Edit
+project/
+│
+├── uploads/                  # For uploaded files
+├── .env                      # Your API credentials
+├── app.py                    # Flask backend
+├── main_llm.py               # Logic handler
+├── llm_utils.py              # Vector RAG + Tachyon logic
+├── streamlit_frontend.py     # UI
+✅ Final Steps
+Add .env with your secrets
+
+Start Flask:
+
+bash
+Copy
+Edit
+python app.py
+Start Streamlit:
+
+bash
+Copy
+Edit
+streamlit run streamlit_frontend.py
