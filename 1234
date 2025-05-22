@@ -1,0 +1,59 @@
+import os
+import yaml
+
+def load_yaml_files(folder):
+    """
+    Recursively loads all .yml files from the folder.
+    Returns a dictionary with relative paths as keys and parsed YAML as values.
+    """
+    yaml_data = {}
+    for root, _, files in os.walk(folder):
+        for file in files:
+            if file.endswith('.yml'):
+                full_path = os.path.join(root, file)
+                rel_path = os.path.relpath(full_path, folder)
+                with open(full_path, 'r') as f:
+                    try:
+                        yaml_data[rel_path] = yaml.safe_load(f) or {}
+                    except yaml.YAMLError as e:
+                        yaml_data[rel_path] = {"error": f"YAML parse error: {str(e)}"}
+    return yaml_data
+
+def create_combined_context(old_folder, new_folder):
+    """
+    Returns a dict with each file's old and new content stored separately.
+    Example:
+    {
+        "file1.yml": {
+            "old": {...},
+            "new": {...}
+        },
+        ...
+    }
+    """
+    old_yaml = load_yaml_files(old_folder)
+    new_yaml = load_yaml_files(new_folder)
+
+    all_files = sorted(set(old_yaml.keys()).union(new_yaml.keys()))
+    combined_context = {}
+
+    for file in all_files:
+        combined_context[file] = {
+            "old": old_yaml.get(file, {}),
+            "new": new_yaml.get(file, {})
+        }
+
+    return combined_context
+
+
+
+
+
+
+
+
+from build_comparator import create_combined_context
+
+context = create_combined_context("old_version", "new_version")
+
+# You can now use `context` in your system prompt
