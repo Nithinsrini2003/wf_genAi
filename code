@@ -18,8 +18,9 @@ def build_endpoint_map(root_yaml_path: str):
     paths = resolved.get("paths", {})
     endpoint_map = {}
     for path, methods in paths.items():
+        endpoint_map[path] = {}  # Initialize dict for methods
         for method, details in methods.items():
-            entry = dict(details)
-            entry["method"] = method.lower()
-            endpoint_map[path] = entry
+            # store method details under method key
+            endpoint_map[path][method.lower()] = details
     return endpoint_map
+
