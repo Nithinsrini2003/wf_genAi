@@ -1,11 +1,60 @@
-SYSTEM_PROMPT = """
-You are an advanced AI assistant specialized in analyzing and comparing API specifications.
+# compare.py
+import yaml
+import jsonref
+import os
 
-Given two API spec documents (one old and one new), perform the following tasks:
-1. Summarize the key features and endpoints of each spec separately.
-2. Highlight the differences between the old and new specs, such as added endpoints, removed ones, changed parameters, or modified request/response structures.
-3. Mention any breaking changes or backwards-incompatible updates.
-4. Present the comparison in a clear and concise format.
+def load_yaml_with_refs(yaml_path: str):
+    base_path = os.path.dirname(yaml_path)
+    def loader(uri):
+        full_path = os.path.join(base_path, uri)
+        with open(full_path, 'r') as f:
+            return yaml.safe_load(f)
+    with open(yaml_path, 'r') as f:
+        root_data = yaml.safe_load(f)
+    return jsonref.JsonRef.replace_refs(root_data, loader=loader)
 
-Ensure your response is well-structured, using bullets or headings where helpful.
-"""
+def build_endpoint_map(root_yaml_path: str):
+    resolved = load_yaml_with_refs(root_yaml_path)
+    paths = resolved.get("paths", {})
+    endpoint_map = {}
+    for path, methods in paths.items():
+        for method, details in methods.items():
+            entry = dict(details)
+            entry["method"] = method.lower()
+            endpoint_map[path] = entry
+    return endpoint_map
+
+def compare_maps(old_map, new_map):
+    summary = {
+        "added": [],
+        "removed": [],
+        "modified": [],
+    }
+
+    old_paths = set(old_map.keys())
+    new_paths = set(new_map.keys())
+
+    added_paths = new_paths - old_paths
+    removed_paths = old_paths - new_paths
+    common_paths = old_paths & new_paths
+
+    for path in added_paths:
+        summary["added"].append({path: new_map[path]})
+
+    for path in removed_paths:
+        summary["removed"].append({path: old_map[path]})
+
+    for path in common_paths:
+        old = old_map[path]
+        new = new_map[path]
+        if old != new:
+            diff = {}
+            for key in set(old.keys()) | set(new.keys()):
+                if old.get(key) != new.get(key):
+                    diff[key] = {
+                        "old": old.get(key),
+                        "new": new.get(key)
+                    }
+            summary["modified"].append({path: diff})
+
+    return summary
