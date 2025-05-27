@@ -23,38 +23,3 @@ def build_endpoint_map(root_yaml_path: str):
             entry["method"] = method.lower()
             endpoint_map[path] = entry
     return endpoint_map
-
-def compare_maps(old_map, new_map):
-    summary = {
-        "added": [],
-        "removed": [],
-        "modified": [],
-    }
-
-    old_paths = set(old_map.keys())
-    new_paths = set(new_map.keys())
-
-    added_paths = new_paths - old_paths
-    removed_paths = old_paths - new_paths
-    common_paths = old_paths & new_paths
-
-    for path in added_paths:
-        summary["added"].append({path: new_map[path]})
-
-    for path in removed_paths:
-        summary["removed"].append({path: old_map[path]})
-
-    for path in common_paths:
-        old = old_map[path]
-        new = new_map[path]
-        if old != new:
-            diff = {}
-            for key in set(old.keys()) | set(new.keys()):
-                if old.get(key) != new.get(key):
-                    diff[key] = {
-                        "old": old.get(key),
-                        "new": new.get(key)
-                    }
-            summary["modified"].append({path: diff})
-
-    return summary
