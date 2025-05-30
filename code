@@ -1,26 +1,94 @@
-# compare.py
-import yaml
-import jsonref
-import os
+JAR Path Retrieval from Build
+The process begins after a successful build.
 
-def load_yaml_with_refs(yaml_path: str):
-    base_path = os.path.dirname(yaml_path)
-    def loader(uri):
-        full_path = os.path.join(base_path, uri)
-        with open(full_path, 'r') as f:
-            return yaml.safe_load(f)
-    with open(yaml_path, 'r') as f:
-        root_data = yaml.safe_load(f)
-    return jsonref.JsonRef.replace_refs(root_data, loader=loader)
+The system automatically identifies the path of the generated .jar file from the build output.
 
-def build_endpoint_map(root_yaml_path: str):
-    resolved = load_yaml_with_refs(root_yaml_path)
-    paths = resolved.get("paths", {})
-    endpoint_map = {}
-    for path, methods in paths.items():
-        endpoint_map[path] = {}  # Initialize dict for methods
-        for method, details in methods.items():
-            # store method details under method key
-            endpoint_map[path][method.lower()] = details
-    return endpoint_map
+Purpose: To dynamically pick up the latest artifact without manual input.
+
+2. Programmatic Extraction of JAR File (Without Saving Locally)
+The JAR is extracted directly in memory using a streaming or temporary method.
+
+No physical storage of the JAR is required on disk.
+
+Purpose: To optimize performance and prevent file clutter.
+
+3. Search for a YAML File Using Regex
+Inside the extracted content, the program searches for a file using a regular expression pattern like:
+
+Copy
+Edit
+wealthexchange-*.yaml
+This matches files such as wealthexchange-v1.yaml, wealthexchange-config.yaml, etc.
+
+Purpose: This file acts as a parent YAML file for configuration reference.
+
+4. Identify the Parent YAML File
+The matched YAML file is considered the root or parent configuration file.
+
+It contains references or pointers to other YAML files that are specific to different build versions.
+
+Purpose: To centralize version references in one place.
+
+5. Redirect and Access Version-Specific YAML Files
+From the parent YAML, the program navigates to version-specific YAMLs based on the entries (e.g., old v1, new v2).
+
+These version-specific YAMLs contain detailed data for old and new build versions.
+
+Purpose: To collect all configuration changes and structure definitions across builds.
+
+6. Store YAML Content into Mappers
+The extracted data from each versioned YAML file is stored into a mapper structure (likely a dictionary or similar format).
+
+For each version:
+
+There is an old version mapper.
+
+There is a new version mapper.
+
+You end up with:
+
+9 old version mappers
+
+9 new version mappers
+
+Purpose: To organize data cleanly for comparisons and tagging.
+
+7. Consolidate All Mappers
+All old mappers are aligned with their respective new mappers.
+
+A combined mapping structure is created that holds the relationship:
+
+nginx
+Copy
+Edit
+old_version_X → new_version_X
+Purpose: This consolidation forms the full context that will be passed for tagging.
+
+8. Send Context to the Tagger
+The consolidated mapping structure is passed as input to a Tagger service or module.
+
+The tagger is responsible for:
+
+Comparing old and new versions
+
+Generating semantic or structural tags
+
+Identifying changes or deltas
+
+Purpose: To automate tagging based on differences across versions.
+
+9. Receive and Process Tagger Output
+The tagger returns a tagged response.
+
+This response is then:
+
+Stored
+
+Displayed
+
+Logged
+
+Or passed to downstream processes
+
+Purpose: To complete the pipeline with actionable insights or results from the version mappings.
 
