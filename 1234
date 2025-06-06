@@ -44,6 +44,31 @@ def create_combined_context(old_folder, new_folder):
         }
 
     return combined_context
+import streamlit as st
+
+# Hide Deploy button, "About", and "Record a screencast" using custom CSS
+hide_streamlit_style = """
+    <style>
+        /* Hide deploy button */
+        .stDeployButton {
+            display: none;
+        }
+
+        /* Hide menu items */
+        [data-testid="stActionMenu"] ul {
+            display: none !important;
+        }
+
+        /* Alternatively, hide individual options (fallback method) */
+        button[title="Record a screencast"],
+        button[title="About"],
+        button[title="Deploy this app"] {
+            display: none !important;
+        }
+    </style>
+"""
+
+st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 
 
 
