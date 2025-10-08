@@ -1,84 +1,44 @@
-import os
-import yaml
-
-def load_yaml_files(folder):
-    """
-    Recursively loads all .yml files from the folder.
-    Returns a dictionary with relative paths as keys and parsed YAML as values.
-    """
-    yaml_data = {}
-    for root, _, files in os.walk(folder):
-        for file in files:
-            if file.endswith('.yml'):
-                full_path = os.path.join(root, file)
-                rel_path = os.path.relpath(full_path, folder)
-                with open(full_path, 'r') as f:
-                    try:
-                        yaml_data[rel_path] = yaml.safe_load(f) or {}
-                    except yaml.YAMLError as e:
-                        yaml_data[rel_path] = {"error": f"YAML parse error: {str(e)}"}
-    return yaml_data
-
-def create_combined_context(old_folder, new_folder):
-    """
-    Returns a dict with each file's old and new content stored separately.
-    Example:
-    {
-        "file1.yml": {
-            "old": {...},
-            "new": {...}
-        },
-        ...
-    }
-    """
-    old_yaml = load_yaml_files(old_folder)
-    new_yaml = load_yaml_files(new_folder)
-
-    all_files = sorted(set(old_yaml.keys()).union(new_yaml.keys()))
-    combined_context = {}
-
-    for file in all_files:
-        combined_context[file] = {
-            "old": old_yaml.get(file, {}),
-            "new": new_yaml.get(file, {})
-        }
-
-    return combined_context
-import streamlit as st
-
-# Hide Deploy button, "About", and "Record a screencast" using custom CSS
-hide_streamlit_style = """
-    <style>
-        /* Hide deploy button */
-        .stDeployButton {
-            display: none;
-        }
-
-        /* Hide menu items */
-        [data-testid="stActionMenu"] ul {
-            display: none !important;
-        }
-
-        /* Alternatively, hide individual options (fallback method) */
-        button[title="Record a screencast"],
-        button[title="About"],
-        button[title="Deploy this app"] {
-            display: none !important;
-        }
-    </style>
-"""
-
-st.markdown(hide_streamlit_style, unsafe_allow_html=True)
-
-
-
-
-
-
-
-
-from build_comparator import create_combined_context
-
-context = create_combined_context("old_version", "new_version")
-
-# You can now use `context` in your system prompt
+Architecture and API Gateway Overview
+• Apigee acts as the central API gateway between clients and internal services.
+• Clients communicate securely with Apigee using mTLS (Mutual TLS).
+• Each API proxy in Apigee has its own revision (v1, v2, etc.) for better version control and
+rollback.
+• Requests flow from external clients → Apigee Gateway → internal Wxchg system → internal
+customer application.
+• Apigee manages policies like authentication, transformation, quota, and rate limiting.
+• Monitoring and analytics are done using Apigee’s trace and analytics tools.
+Source Control, CI/CD, and Liquibase Workflow
+• Developers create new feature branches from the main development branch in GitHub.
+• Liquibase is used for database version control. It maintains changelog files defining schema
+updates.
+• Once code and DB changes are complete, a Pull Request (PR) is created and reviewed.
+• Upon merging, CI (Continuous Integration) pipelines automatically trigger builds and unit tests.
+• Artifacts such as JAR files or container images are generated and uploaded to the artifact
+repository.
+• Liquibase migrations are executed in CI or at deploy time to update the database schema
+safely.
+• Continuous Delivery (CD) pipelines handle promotion of builds across environments — Dev,
+Staging, and Prod.
+• Rollback mechanisms are in place for both application and database using Liquibase rollback
+tags.
+On-Premise vs Cloud Setup
+• Earlier systems used on-premise infrastructure with Jenkins for CI and UCD (UrbanCode
+Deploy) for deployment.
+• The modernized setup now uses GitHub Actions for CI/CD with cloud-based repositories and
+pipelines.
+• GitHub Actions workflows automate build, test, and deployment stages across multiple
+environments.
+• Artifacts and build summaries are stored within the GitHub Actions environment for traceability.
+• The new setup offers faster execution, better security integration, and easier monitoring
+compared to the legacy pipeline.
+GitHub Workflows and Release Process
+• Snapshot Workflow: Runs automatically on pull requests to generate temporary test builds for
+validation.
+• PR Workflow: Executes build, lint, and Liquibase DB validation for each pull request.
+• Release Candidate Workflow: Manually triggered to build stable, versioned release candidates
+for QA testing.
+• Any Workflow: Manual re-run of any workflow for debugging or rerunning tests.
+• Chained CD Workflow: Links multiple stages such as Dev → Staging → Production for
+continuous deployment.
+• Release artifacts and build summaries are documented under GitHub Actions → Artifacts
+section for reference.
