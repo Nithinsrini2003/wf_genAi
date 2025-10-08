@@ -1,94 +1,37 @@
-JAR Path Retrieval from Build
-The process begins after a successful build.
+Sure 😊 Here’s your KT session content written **paragraph by paragraph** — clearly structured and elaborated, while keeping everything professional and easy to follow:
 
-The system automatically identifies the path of the generated .jar file from the build output.
+---
 
-Purpose: To dynamically pick up the latest artifact without manual input.
+### **KT Session Summary**
 
-2. Programmatic Extraction of JAR File (Without Saving Locally)
-The JAR is extracted directly in memory using a streaming or temporary method.
+**Paragraph 1:**
+During the KT sessions, the discussion began with an overview of the Foreign Exchange (FX) market. FX is considered the most liquid financial market in the world, with vast trading volumes and continuous operations across different time zones. The participants in this market mainly include wholesale and commercial clients who trade currencies for investment, business, or hedging purposes. The difference between the buying and selling prices of a currency is referred to as the *spread*, which determines the profit margin for traders and financial institutions. Understanding how the spread works is crucial for evaluating trade efficiency and pricing strategies.
 
-No physical storage of the JAR is required on disk.
+---
 
-Purpose: To optimize performance and prevent file clutter.
+**Paragraph 2:**
+The FX trading process involves several key stages—starting with **pricing** and **communication** between systems. Various tools and components such as **Solace**, **FIRE**, and **ID Match** play vital roles in ensuring smooth and accurate trade execution. Solace acts as a messaging middleware that enables real-time data exchange between systems, while ID Match ensures proper trade identification and mapping across multiple systems. These tools help in maintaining data integrity, synchronization, and efficiency within the overall FX workflow.
 
-3. Search for a YAML File Using Regex
-Inside the extracted content, the program searches for a file using a regular expression pattern like:
+---
 
-Copy
-Edit
-wealthexchange-*.yaml
-This matches files such as wealthexchange-v1.yaml, wealthexchange-config.yaml, etc.
+**Paragraph 3:**
+The **trade life cycle** was also discussed in detail. It begins when a client initiates a trade, which is then processed through pricing and communication layers using systems like Solace and ID Match. Once a trade is validated and accepted, it moves into the **trade book**, where trade initiation and templates are managed. From there, the trade progresses downstream, where updates are reflected in systems such as **OPS (Operations)** and **trade information services**. These downstream updates ensure that trade details remain consistent and synchronized across all platforms, supporting transparency and operational accuracy.
 
-Purpose: This file acts as a parent YAML file for configuration reference.
+---
 
-4. Identify the Parent YAML File
-The matched YAML file is considered the root or parent configuration file.
+**Paragraph 4:**
+Another important topic covered during the sessions was the **Watcher** component. The Watcher system monitors and manages communication between different client types—internal (machine-to-machine) and external clients. Internal clients typically communicate directly within the organization’s network, while external clients connect through a **gateway**, which interfaces with the Watcher. This setup ensures that all incoming and outgoing messages are tracked, validated, and securely transmitted, thus maintaining data integrity and system stability.
 
-It contains references or pointers to other YAML files that are specific to different build versions.
+---
 
-Purpose: To centralize version references in one place.
+**Paragraph 5:**
+The session with **Sunil** focused on aspects of **Continuous Deployment (CD)** and **Business-to-System (B2S)** interactions. The CD process involves managing and deploying applications efficiently to ensure smooth updates and version control. Within B2S, the concept of **ACKING** was discussed, which refers to performing health checks for SOAP-based B2S clients to ensure that communication and system responses remain stable. Additionally, the concept of **Ratsheeting** was mentioned, which involves generating reports or data sheets for monitoring and validating business operations within the B2S ecosystem. These practices ensure that systems remain healthy, responsive, and transparent in their operations.
 
-5. Redirect and Access Version-Specific YAML Files
-From the parent YAML, the program navigates to version-specific YAMLs based on the entries (e.g., old v1, new v2).
+---
 
-These version-specific YAMLs contain detailed data for old and new build versions.
+**Paragraph 6:**
+Overall, the KT sessions provided a comprehensive understanding of the FX trade process, system integrations, and trade life cycle management. They also covered the importance of supporting tools such as Solace, Watcher, and B2S components in maintaining data consistency and operational efficiency. The sessions emphasized how seamless communication between systems and timely monitoring can significantly improve accuracy, reduce delays, and strengthen the overall financial infrastructure.
 
-Purpose: To collect all configuration changes and structure definitions across builds.
+---
 
-6. Store YAML Content into Mappers
-The extracted data from each versioned YAML file is stored into a mapper structure (likely a dictionary or similar format).
-
-For each version:
-
-There is an old version mapper.
-
-There is a new version mapper.
-
-You end up with:
-
-9 old version mappers
-
-9 new version mappers
-
-Purpose: To organize data cleanly for comparisons and tagging.
-
-7. Consolidate All Mappers
-All old mappers are aligned with their respective new mappers.
-
-A combined mapping structure is created that holds the relationship:
-
-nginx
-Copy
-Edit
-old_version_X → new_version_X
-Purpose: This consolidation forms the full context that will be passed for tagging.
-
-8. Send Context to the Tagger
-The consolidated mapping structure is passed as input to a Tagger service or module.
-
-The tagger is responsible for:
-
-Comparing old and new versions
-
-Generating semantic or structural tags
-
-Identifying changes or deltas
-
-Purpose: To automate tagging based on differences across versions.
-
-9. Receive and Process Tagger Output
-The tagger returns a tagged response.
-
-This response is then:
-
-Stored
-
-Displayed
-
-Logged
-
-Or passed to downstream processes
-
-Purpose: To complete the pipeline with actionable insights or results from the version mappings.
-
+Would you like me to convert this into a **professionally formatted Word or PDF file** (with proper headings and spacing)?
