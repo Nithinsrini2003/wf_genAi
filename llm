@@ -1,103 +1,21 @@
-from dotenv import load_dotenv
-from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain_community.embeddings import SentenceTransformerEmbeddings
-from langchain_community.vectorstores import FAISS
-import requests
-import os
-import json
+Perfect 👍 That’s a very good set of points for the **Risk Overlay** section — it shows awareness of both **data security** and **technical risk management**.
 
-load_dotenv()
+Here’s a **professionally written version** of your **Risk Overlay** section:
 
-COOKIES = {
-    "Higgs_session": os.getenv("HIGGS_SESSION", "")
-}
+---
 
-TACHYON_URL = os.getenv("TACHYON_URL", "")
-MODEL_ID = os.getenv("MODEL_ID", "")
-TEXT_EMBEDDING_MODEL = os.getenv("TEXT_EMBEDDING_MODEL", "")
+### **Risk Overlay**
 
-print(TACHYON_URL)
+Throughout my internship, I proactively identified and mitigated potential risks related to data security and system compatibility:
 
-# ✅ New system prompt for comparing API specs
-SYSTEM_PROMPT = """
-You are a backend AI agent that specializes in analyzing and comparing API specifications. You are given two files: 
-one containing the old version of an API spec and another containing the new version. Your task is to first summarize 
-each API spec, including key endpoints, methods (GET, POST, etc.), and their request/response structures. Then, 
-perform a comparison analysis between the two versions. Highlight what has changed, such as newly added endpoints, 
-removed endpoints, modified methods, updated parameters, or body structure differences. Present the output in a 
-clear and structured format.
-"""
+* **Prevention of Sensitive Data Leakage:**
+  While working with **GitHub Covalent**, I ensured that no sensitive or confidential information was exposed. Strict validation and review processes were followed to prevent any unintentional data leakage, maintaining compliance with security standards.
 
-headers = {
-    "Content-Type": "application/json"
-}
+* **Cross-Platform Compatibility (HyperExecute):**
+  During the **Vulkan to HyperExecute integration**, I addressed a key technical risk involving **Windows (Vulkan)** and **Linux (HyperExecute)** platform differences. I successfully modified Windows-specific logic to ensure seamless Linux compatibility without breaking the automation code, enabling a **cross-platform execution environment**.
 
-# Optional: text splitting logic
-def load_and_process_file(file_path):
-    with open(file_path, "r") as file:
-        text = file.read()
-    text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
-    docs = text_splitter.create_documents([text])
-    return docs
+These measures minimized operational risks and enhanced both the security and reliability of the overall implementation.
 
-# Optional: create vector store
-def create_vector_store(docs):
-    doc_texts = [doc.page_content for doc in docs]
-    PAYLOAD = {
-        "modelId": TEXT_EMBEDDING_MODEL,
-        "presetId": "6821bd11079b5e9ac88d3569",
-        "query": doc_texts,
-        "systemInstruction": SYSTEM_PROMPT,
-    }
+---
 
-    response = requests.post(TACHYON_URL, json=PAYLOAD, cookies=COOKIES, headers=headers, verify=False)
-
-    answer = ""
-    if response.status_code == 200:
-        answer = response.json().get("answer", [])
-        print(f"embedding: {answer}")
-    else:
-        print("Failed to connect. Status code:", response.status_code)
-        print("Response:", response.text)
-
-    embeddings = SentenceTransformerEmbeddings(model_name=TEXT_EMBEDDING_MODEL)
-    vector_store = FAISS.from_documents(docs, embeddings)
-    return vector_store
-
-# Main LLM call: for comparing two API spec files
-def call_llm(old_file_path, new_file_path):
-    with open(old_file_path, "r") as f1:
-        old_content = f1.read()
-    with open(new_file_path, "r") as f2:
-        new_content = f2.read()
-
-    combined_context = f"Old API Spec:\n{old_content}\n\nNew API Spec:\n{new_content}"
-
-    PAYLOAD = {
-        "fileIdList": [old_file_path, new_file_path],
-        "folderIdList": ["./data"],
-        "modelId": MODEL_ID,
-        "parameters": {
-            "maxOutputTokens": 8000,
-            "temperature": 0.5,
-            "topK": 40,
-            "topP": 0.3
-        },
-        "presetId": "6821bd11079b5e9ac88d3569",
-        "query": combined_context,
-        "systemInstruction": SYSTEM_PROMPT,
-        "useRawFileContent": False,
-        "userId": "ke08987"
-    }
-
-    response = requests.post(TACHYON_URL, json=PAYLOAD, cookies=COOKIES, headers=headers)
-
-    if response.status_code == 200:
-        answer = response.json().get("answer", "No answer provided.")
-        print(f"\n🔍 COMPARISON OUTPUT:\n{answer}")
-    else:
-        print("Failed to connect. Status code:", response.status_code)
-        print("Response:", response.text)
-        answer = response.text
-
-    return answer
+Would you like me to now create the **Overall Summary** section (which ties together your achievements, growth, and future goals in a concise closing paragraph)?
