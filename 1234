@@ -1,44 +1,11 @@
-Architecture and API Gateway Overview
-• Apigee acts as the central API gateway between clients and internal services.
-• Clients communicate securely with Apigee using mTLS (Mutual TLS).
-• Each API proxy in Apigee has its own revision (v1, v2, etc.) for better version control and
-rollback.
-• Requests flow from external clients → Apigee Gateway → internal Wxchg system → internal
-customer application.
-• Apigee manages policies like authentication, transformation, quota, and rate limiting.
-• Monitoring and analytics are done using Apigee’s trace and analytics tools.
-Source Control, CI/CD, and Liquibase Workflow
-• Developers create new feature branches from the main development branch in GitHub.
-• Liquibase is used for database version control. It maintains changelog files defining schema
-updates.
-• Once code and DB changes are complete, a Pull Request (PR) is created and reviewed.
-• Upon merging, CI (Continuous Integration) pipelines automatically trigger builds and unit tests.
-• Artifacts such as JAR files or container images are generated and uploaded to the artifact
-repository.
-• Liquibase migrations are executed in CI or at deploy time to update the database schema
-safely.
-• Continuous Delivery (CD) pipelines handle promotion of builds across environments — Dev,
-Staging, and Prod.
-• Rollback mechanisms are in place for both application and database using Liquibase rollback
-tags.
-On-Premise vs Cloud Setup
-• Earlier systems used on-premise infrastructure with Jenkins for CI and UCD (UrbanCode
-Deploy) for deployment.
-• The modernized setup now uses GitHub Actions for CI/CD with cloud-based repositories and
-pipelines.
-• GitHub Actions workflows automate build, test, and deployment stages across multiple
-environments.
-• Artifacts and build summaries are stored within the GitHub Actions environment for traceability.
-• The new setup offers faster execution, better security integration, and easier monitoring
-compared to the legacy pipeline.
-GitHub Workflows and Release Process
-• Snapshot Workflow: Runs automatically on pull requests to generate temporary test builds for
-validation.
-• PR Workflow: Executes build, lint, and Liquibase DB validation for each pull request.
-• Release Candidate Workflow: Manually triggered to build stable, versioned release candidates
-for QA testing.
-• Any Workflow: Manual re-run of any workflow for debugging or rerunning tests.
-• Chained CD Workflow: Links multiple stages such as Dev → Staging → Production for
-continuous deployment.
-• Release artifacts and build summaries are documented under GitHub Actions → Artifacts
-section for reference.
+During my six-month internship with the Public API team, I made significant contributions across multiple initiatives:
+HyperExecute Integration (TCIE Team):
+Successfully completed a full Proof of Concept (POC) and progressed halfway through the implementation of Vulkan to HyperExecute integration. This involved understanding the existing workflow, setting up configurations, and optimizing execution efficiency.
+
+GenAI Project – Delta API Comparison:
+Ideated and developed a Proof of Concept (POC) for Delta API Comparison, enabling automated identification of differences between two API versions. This experimentation demonstrated the potential of leveraging GenAI for API comparison and enhanced efficiency in API version management.
+WealthExchange Confluence Page:
+Created a dedicated Confluence page for WealthExchange, consolidating setup guidelines, component details, and related documentation. This served as a centralized knowledge hub, improving accessibility and collaboration within the team.
+
+WealthExchange Confluence Page:
+Created a dedicated Confluence page for WealthExchange, consolidating setup guidelines, component details, and related documentation. This served as a centralized knowledge hub, improving accessibility and collaboration within the team.
