@@ -1,41 +1,7 @@
-@workspace
-
-You have full access to my entire project context.
-
-Your task: Migrate this complete repository from Maven to Gradle accurately and completely.
-
-Follow these steps carefully:
-
-1. **Analyze the existing Maven setup:**
-   - Read all pom.xml files (including root and submodules).
-   - Identify dependencies (with scopes), plugins, repositories, build profiles, and properties.
-   - Note packaging types (jar, war, etc.), compiler settings, and module relationships.
-
-2. **Generate Gradle configuration:**
-   - Create a root-level `settings.gradle` and `build.gradle` file.
-   - For each module, generate its own `build.gradle` reflecting its Maven pom.xml.
-   - Replace Maven plugins with equivalent Gradle plugins or custom Gradle tasks.
-   - Maintain all dependencies, repositories, and configurations exactly.
-   - Preserve all project metadata, build logic, and environment variables.
-
-3. **Ensure functional equivalence:**
-   - The Gradle build should produce the same artifacts as the Maven build.
-   - All tests, packaging, and dependency resolutions must work exactly as before.
-   - For unsupported Maven plugins, implement their equivalent logic in Gradle.
-
-4. **Code Style & DSL:**
-   - If the project is Java-based, use **Groovy DSL** (`build.gradle`).
-   - If the project involves Kotlin or modern tooling, use **Kotlin DSL** (`build.gradle.kts`).
-   - Keep the structure modular, readable, and maintainable.
-
-5. **Validation Steps:**
-   - After migration, ensure the Gradle build runs successfully (`gradle build`).
-   - Verify that all JAR/WAR outputs match previous Maven artifacts.
-   - Confirm that test and dependency tasks execute successfully.
-
-6. **Output Expected:**
-   - Provide complete `settings.gradle` and `build.gradle` files for all modules.
-   - Highlight any Maven plugin or configuration that required adaptation.
-   - Include Gradle commands to build, test, and run the project.
-
-Be 100% accurate
+Hey team, I’ll be logging off for the day and won’t be able to attend the stand-up call today.
+Updates:
+Connected with the HCL team regarding the Hyper-Execute migration. The DB issues in IBH are now fixed. I still need to complete the full validation in Hyper-Execute for IBH — once that’s done, IBH should be all good.
+For the Maven to Gradle migration, I resolved the dependency and version incompatibility issues. All builds are now working fine, but currently, 84 out of 174 JUnit test cases are failing — I’ll work on fixing those next.
+I’ll give the Hyper-Execute demo on Monday, as I’ll be on PTO tomorrow.
+For Prasad, I’ll provide your updates once you’re back from vacation.
+Thank you, team.
