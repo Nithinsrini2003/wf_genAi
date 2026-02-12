@@ -1,0 +1,207 @@
+workflow mapper 
+
+def extract_number(msg, default=5):
+    for w in msg.split():
+        if w.isdigit():
+            return int(w)
+    return default
+
+
+def map_prompt_to_workflow(message):
+    msg = message.lower()
+
+    if "top" in msg and "trader" in msg:
+        return {
+            "workflow": "top_fx_traders.yaml",
+            "params": {"limit": extract_number(msg)}
+        }
+
+    if "spot" in msg and "rate" in msg:
+        pair = msg.split()[-1].upper()
+        return {
+            "workflow": "fx_spot_rate.yaml",
+            "params": {"pair": pair}
+        }
+
+    if "volume" in msg and "currency" in msg:
+        return {
+            "workflow": "fx_trade_volume.yaml",
+            "params": {}
+        }
+
+    if "pnl" in msg and "trader" in msg:
+        return {
+            "workflow": "fx_pnl_by_trader.yaml",
+            "params": {"trader_id": extract_number(msg, 1)}
+        }
+
+    if "top" in msg and "pair" in msg:
+        return {
+            "workflow": "fx_top_currency_pairs.yaml",
+            "params": {}
+        }
+
+    return None
+
+
+workflow engine
+
+import yaml
+from mcps import customer_mcp, trade_mcp, fx_rate_mcp, fx_analytics_mcp
+
+MCP_MAP = {
+    "customer_mcp": customer_mcp,
+    "trade_mcp": trade_mcp,
+    "fx_rate_mcp": fx_rate_mcp,
+    "fx_analytics_mcp": fx_analytics_mcp
+}
+
+class WorkflowEngine:
+    def __init__(self, workflow, params):
+        with open(f"workflows/{workflow}") as f:
+            self.steps = yaml.safe_load(f)["steps"]
+        self.params = params
+        self.context = {}
+
+    def execute(self):
+        for step in self.steps:
+            payload = {}
+
+            if "params" in step:
+                for k, v in step["params"].items():
+                    payload[k] = self.params.get(k)
+
+            if "input_from" in step:
+                payload["data"] = self.context[step["input_from"]]
+
+            fn = getattr(MCP_MAP[step["mcp"]], step["action"])
+            self.context[step["output"]] = fn(payload)
+
+        return self.context
+
+
+worker mcps 
+
+customer mcp 
+
+FX_TRADERS = [
+    {"id": 1, "name": "TraderA"},
+    {"id": 2, "name": "TraderB"},
+    {"id": 3, "name": "TraderC"}
+]
+
+def get_top_fx_traders(payload):
+    return FX_TRADERS[:payload["limit"]]
+
+
+
+trade mcp 
+
+FX_TRADES = [
+    {"trader": 1, "pair": "USD/EUR", "amount": 1000, "pnl": 50},
+    {"trader": 2, "pair": "USD/INR", "amount": 2000, "pnl": -20},
+    {"trader": 1, "pair": "EUR/GBP", "amount": 1500, "pnl": 30}
+]
+
+def get_trades_for_traders(payload):
+    traders = [t["id"] for t in payload["data"]]
+    return [t for t in FX_TRADES if t["trader"] in traders]
+
+def get_trades_for_trader(payload):
+    return [t for t in FX_TRADES if t["trader"] == payload["trader_id"]]
+
+def get_all_fx_trades(payload=None):
+    return FX_TRADES
+
+
+rate mcp
+
+RATES = {
+    "USD/EUR": 0.92,
+    "USD/INR": 83.1
+}
+
+def get_spot_rate(payload):
+    return {"pair": payload["pair"], "rate": RATES.get(payload["pair"], "N/A")}
+
+
+analytics mcp 
+
+from collections import defaultdict
+
+def calculate_trade_volume(payload):
+    result = defaultdict(int)
+    for t in payload["data"]:
+        result[t["trader"]] += t["amount"]
+    return dict(result)
+
+def calculate_volume_by_currency(payload):
+    result = defaultdict(int)
+    for t in payload["data"]:
+        result[t["pair"]] += t["amount"]
+    return dict(result)
+
+def calculate_pnl(payload):
+    return sum(t["pnl"] for t in payload["data"])
+
+def top_currency_pairs(payload):
+    result = defaultdict(int)
+    for t in payload["data"]:
+        result[t["pair"]] += t["amount"]
+    return dict(result)
+
+
+ui 
+
+<!DOCTYPE html>
+<html>
+<body>
+  <h2>FX Chatbot</h2>
+  <input id="msg" style="width:400px">
+  <button onclick="send()">Send</button>
+  <pre id="chat"></pre>
+
+<script>
+async function send() {
+  const msg = document.getElementById("msg").value
+  const res = await fetch("/chat", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({message: msg})
+  })
+  const data = await res.json()
+  document.getElementById("chat").innerText +=
+    "\nUser: " + msg + "\nBot: " + JSON.stringify(data.reply, null, 2)
+}
+</script>
+</body>
+</html>
+
+
+app.py
+
+from flask import Flask, request, jsonify, send_from_directory
+from workflow_mapper import map_prompt_to_workflow
+from workflow_engine import WorkflowEngine
+
+app = Flask(__name__)
+
+@app.route("/")
+def ui():
+    return send_from_directory("ui", "index.html")
+
+@app.route("/chat", methods=["POST"])
+def chat():
+    msg = request.json["message"]
+    mapping = map_prompt_to_workflow(msg)
+
+    if not mapping:
+        return jsonify({"reply": "Unsupported FX request"})
+
+    engine = WorkflowEngine(mapping["workflow"], mapping["params"])
+    result = engine.execute()
+    return jsonify({"reply": result})
+
+if __name__ == "__main__":
+    app.run(port=5000)
+
