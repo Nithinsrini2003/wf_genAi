@@ -1,0 +1,89 @@
+req 
+
+flask
+pyyaml
+requests
+threading
+
+top fx traders 
+
+steps:
+  - id: fetch_traders
+    mcp: customer_mcp
+    action: get_top_fx_traders
+    params:
+      limit: "{{limit}}"
+    output: traders
+
+  - id: fetch_trades
+    mcp: trade_mcp
+    action: get_trades_for_traders
+    input_from: traders
+    output: trades
+
+  - id: calculate_volume
+    mcp: fx_analytics_mcp
+    action: calculate_trade_volume
+    input_from: trades
+    output: result
+
+
+fx spot rate 
+
+steps:
+  - id: get_rate
+    mcp: fx_rate_mcp
+    action: get_spot_rate
+    params:
+      pair: "{{pair}}"
+    output: rate
+
+trade volume 
+
+steps:
+  - id: fetch_trades
+    mcp: trade_mcp
+    action: get_all_fx_trades
+    output: trades
+
+  - id: calculate_volume
+    mcp: fx_analytics_mcp
+    action: calculate_volume_by_currency
+    input_from: trades
+    output: result
+
+pnl by trader 
+
+steps:
+  - id: fetch_trades
+    mcp: trade_mcp
+    action: get_trades_for_trader
+    params:
+      trader_id: "{{trader_id}}"
+    output: trades
+
+  - id: calculate_pnl
+    mcp: fx_analytics_mcp
+    action: calculate_pnl
+    input_from: trades
+    output: result
+
+
+top currency pairs 
+
+steps:
+  - id: fetch_trades
+    mcp: trade_mcp
+    action: get_all_fx_trades
+    output: trades
+
+  - id: calculate_pairs
+    mcp: fx_analytics_mcp
+    action: top_currency_pairs
+    input_from: trades
+    output: result
+
+
+
+
+
