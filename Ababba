@@ -1,6 +1,88 @@
-© 2 files type : PoF & Exel.
-@ Mcp needed for reading the fie.
-B Task of the Mcp: File there or not if there i file read if else file not found.
-@ o Usa it they dick on a button, Then it should able to do thủ .
+I already have the following functionality implemented:
 
-We need another mop where that i used to send a mail of the file to the person which we give dont Use any protocol.
+* Natural Language → Rule Generation
+* Rule → AST Conversion
+* AST → Dynamic Java Code Generation
+* Dynamic Java Code → Server Execution
+
+Do not rebuild the above components. Reuse and integrate them.
+
+Build the remaining MCP Orchestration Platform with the following features:
+
+UI Modules
+
+1. MCP Registry
+    * Register MCPs
+    * Upload OpenAPI/Swagger specs
+    * Extract and display capabilities
+    * View MCP details and capabilities
+2. Workflow Designer
+    * Drag-and-drop workflow creation
+    * Natural language workflow creation
+    * Create workflows using MCP capabilities
+    * Store workflows for reuse
+    * Support On-Demand, Event-Driven, and Scheduled workflows
+3. Chatbot
+    * Allow users to execute workflows using natural language
+    * Discover relevant MCPs and capabilities
+    * Generate workflow automatically
+    * Trigger existing rule engine and execution engine
+4. Execution Dashboard
+    * Show workflow execution status
+    * Show final response
+    * Show execution history
+5. Explainability Dashboard
+    * Show each MCP execution step
+    * Show request and response for each MCP
+    * Show execution time and status
+    * Show how outputs are mapped to inputs of subsequent MCPs
+    * Visualize plumbing/mappings between MCPs
+
+Backend Features
+
+1. MCP Registry Service
+    * Store MCP metadata
+    * Store API specifications
+    * Extract capabilities
+2. Workflow Service
+    * Persist workflows
+    * Manage execution modes
+3. Dynamic Plumbing Engine
+    * Automatically map response fields from one MCP to request fields of the next MCP using API specifications
+    * Generate and store mapping metadata
+    * Support transformations and validations
+4. Execution Orchestrator
+    * Execute workflows step-by-step
+    * Invoke MCPs dynamically
+    * Pass mapped outputs to subsequent MCPs
+    * Capture execution traces
+
+Expected UI After Execution
+
+Summary View:
+
+* Workflow Status
+* Final Response
+
+Detailed View:
+
+* MCP 1 Request/Response
+* MCP 2 Request/Response
+* MCP 3 Request/Response
+* Execution Time
+* Status
+
+Mapping View:
+
+* quoteId → quoteConfirm.quoteId
+* dealId → dealInquiry.dealId
+
+Developer View:
+
+* Generated Rule
+* Generated AST
+* Generated Execution Plan
+* Generated Java Code
+* Execution Logs
+
+Focus on scalable enterprise architecture, clean React UI, Spring Boot backend, and reusable workflow orchestration components.
